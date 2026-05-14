@@ -57,6 +57,8 @@
       padding: 24px;
       margin-bottom: 22px;
       box-shadow: 0 4px 18px rgba(120, 100, 70, 0.05);
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .section-title {
@@ -127,6 +129,8 @@
       border-radius: 20px;
       padding: 20px;
       margin-bottom: 18px;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
 
     .reflection-head {
@@ -214,6 +218,32 @@
       margin-top: 36px;
     }
 
+    .page-break-before {
+      break-before: page;
+      page-break-before: always;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .page {
+        max-width: none;
+        padding: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .card,
+      .reflection-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+    }
+
     @media (max-width: 640px) {
       h1 {
         font-size: 26px;
@@ -272,7 +302,7 @@
       </div>
     </section>
 
-    <section class="card">
+    <section class="card page-break-before">
       <div class="center">
         <div class="question-number">REFLECTION</div>
         <h2 class="section-title">すでに「あるもの」を見つける</h2>
@@ -284,7 +314,7 @@
       <div id="reflections"></div>
     </section>
 
-    <section class="card">
+    <section class="card page-break-before">
       <div class="center">
         <div class="question-number">NEXT STEP</div>
         <h2 class="section-title">0.5点だけ高めるなら？</h2>
@@ -513,40 +543,8 @@
       }
     }
 
-    async function downloadPDF() {
-      const button = document.querySelector("button");
-      button.style.display = "none";
-
-      const area = document.getElementById("pdfArea");
-      const canvas = await html2canvas(area, {
-        scale: 2,
-        backgroundColor: "#fdfbf7"
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      const pdfWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = canvas.height * pdfWidth / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const fileDate = timestampText.replace(/[/: ]/g, "-");
-      pdf.save(`aru-mono-work-${fileDate}.pdf`);
-
-      button.style.display = "inline-block";
+    function downloadPDF() {
+      window.print();
     }
 
     renderQuestions();
