@@ -270,6 +270,20 @@
 <body>
   <div class="page" id="pdfArea">
     <header class="header">
+      <div style="margin-bottom: 18px;">
+        <svg width="90" height="90" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="60" cy="72" rx="28" ry="24" fill="#ffffff" stroke="#d8d0c7" stroke-width="2"/>
+          <circle cx="48" cy="66" r="3" fill="#6b6b6b"/>
+          <circle cx="72" cy="66" r="3" fill="#6b6b6b"/>
+          <path d="M56 76C58 79 62 79 64 76" stroke="#6b6b6b" stroke-width="2" stroke-linecap="round"/>
+          <path d="M38 52L48 34L58 54" fill="#ffffff" stroke="#d8d0c7" stroke-width="2"/>
+          <path d="M62 54L72 34L82 52" fill="#ffffff" stroke="#d8d0c7" stroke-width="2"/>
+          <path d="M42 73H26" stroke="#d8d0c7" stroke-width="2" stroke-linecap="round"/>
+          <path d="M42 78H24" stroke="#d8d0c7" stroke-width="2" stroke-linecap="round"/>
+          <path d="M78 73H94" stroke="#d8d0c7" stroke-width="2" stroke-linecap="round"/>
+          <path d="M78 78H96" stroke="#d8d0c7" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div class="timestamp" id="timestamp"></div>
       <h1>「あるもの」をみるヒント</h1>
       <p class="lead">
@@ -307,11 +321,31 @@
         <div class="question-number">REFLECTION</div>
         <h2 class="section-title">すでに「あるもの」を見つける</h2>
         <p>
-          大切なのは「なぜ0ではないのだろう？」と、<br />
+          10項目の中から、今いちばん気になる項目をひとつ選んでみましょう。<br />
+          大切なのは「なぜ0ではないのだろう？」と、
           今の自分の中にすでにあるものへ目を向けることです。
         </p>
       </div>
-      <div id="reflections"></div>
+
+      <div class="next-grid">
+        <div>
+          <label class="label">振り返る項目</label>
+          <select id="reflectionCategory" onchange="updateReflectionArea()"></select>
+        </div>
+
+        <div>
+          <div class="reflection-card" style="margin-bottom: 0;">
+            <div class="reflection-head">
+              <div class="reflection-title" id="reflectionTitle"></div>
+              <div class="score-badge" id="reflectionScore"></div>
+            </div>
+
+            <label class="label" id="reflectionLabel"></label>
+
+            <textarea id="reflectionTextarea"></textarea>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="card page-break-before">
@@ -340,7 +374,19 @@
       <button onclick="downloadPDF()">PDFで保存する</button>
     </div>
 
-    <footer class="footer">© SATOMI KAWASE</footer>
+    <footer class="footer">
+      <div style="margin-bottom: 10px; opacity: 0.75;">
+        <svg width="44" height="44" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="60" cy="72" rx="28" ry="24" fill="#ffffff" stroke="#d8d0c7" stroke-width="2"/>
+          <circle cx="48" cy="66" r="3" fill="#6b6b6b"/>
+          <circle cx="72" cy="66" r="3" fill="#6b6b6b"/>
+          <path d="M56 76C58 79 62 79 64 76" stroke="#6b6b6b" stroke-width="2" stroke-linecap="round"/>
+          <path d="M38 52L48 34L58 54" fill="#ffffff" stroke="#d8d0c7" stroke-width="2"/>
+          <path d="M62 54L72 34L82 52" fill="#ffffff" stroke="#d8d0c7" stroke-width="2"/>
+        </svg>
+      </div>
+      © SATOMI KAWASE
+    </footer>
   </div>
 
   <script>
@@ -453,25 +499,31 @@
     }
 
     function renderReflections() {
-      const container = document.getElementById("reflections");
-      container.innerHTML = "";
+      const select = document.getElementById("reflectionCategory");
 
       questions.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "reflection-card";
-        div.innerHTML = `
-          <div class="reflection-head">
-            <div class="reflection-title">${item.category}</div>
-            <div class="score-badge" id="scoreBadge${index}">${scores[index]}点</div>
-          </div>
-          <label class="label">
-            なぜこの項目は0点ではなく、${scores[index]}点なのでしょうか？<br />
-            今のあなたの中にすでに「あるもの」を書いてみましょう。
-          </label>
-          <textarea placeholder="${item.placeholder}"></textarea>
-        `;
-        container.appendChild(div);
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = item.category;
+        select.appendChild(option);
       });
+
+      updateReflectionArea();
+    }
+
+    function updateReflectionArea() {
+      const selectedIndex = Number(document.getElementById("reflectionCategory").value || 0);
+      const item = questions[selectedIndex];
+
+      document.getElementById("reflectionTitle").textContent = item.category;
+      document.getElementById("reflectionScore").textContent = `${scores[selectedIndex]}点`;
+
+      document.getElementById("reflectionLabel").innerHTML = `
+        なぜこの項目は0点ではなく、${scores[selectedIndex]}点なのでしょうか？<br />
+        今のあなたの中にすでに「あるもの」を書いてみましょう。
+      `;
+
+      document.getElementById("reflectionTextarea").placeholder = item.placeholder;
     }
 
     function renderSelect() {
@@ -529,9 +581,10 @@
       chart.data.datasets[0].data = scores;
       chart.update();
 
-      const badges = document.querySelectorAll(".score-badge");
-      if (badges[index]) {
-        badges[index].textContent = `${value}点`;
+      const selectedIndex = Number(document.getElementById("reflectionCategory")?.value || 0);
+
+      if (selectedIndex === index) {
+        updateReflectionArea();
       }
 
       const labels = document.querySelectorAll(".reflection-card .label");
